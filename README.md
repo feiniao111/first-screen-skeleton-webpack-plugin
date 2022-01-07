@@ -25,7 +25,7 @@
 fork自饿了么的[page-skeleton-webpack-plugin](https://github.com/ElemeFE/page-skeleton-webpack-plugin)项目，但做出如下改变：
 
 - 除history路由外，支持hash路由
-- 支持多入口页面
+- 支持多入口页面(hash路由)
 - 骨架屏生成算法调整，改用[京东dps](https://github.com/famanoder/dps),以优化体积
 - 参数优化，精简参数
 
