@@ -18,7 +18,7 @@
 
 <br />
 
-![](https://https://github.com/feiniao111/first-screen-skeleton-webpack-plugin/raw/master/docs/workflow.gif)
+![](https://github.com/feiniao111/first-screen-skeleton-webpack-plugin/raw/master/docs/workflow.gif)
 
 ### Features
 
@@ -31,17 +31,11 @@ fork自饿了么的[page-skeleton-webpack-plugin](https://github.com/ElemeFE/pag
 
 <h4 align="center">Loading animations</h4>
 
-| Spin | Shine | Chiaroscuro |
-|:---:|:---:|:---:|
-| ![](./docs/spin.gif) | ![](./docs/shine.gif) | ![](./docs/chiaroscuro.gif) |
-
-_speed up play_
-
 ### Examples
 
 All examples are in the `examples` folder.
 
-* [**sale**](https://github.com/ElemeFE/page-skeleton-webpack-plugin/tree/master/examples/sale)
+* [**sale**](https://github.com/feiniao111/first-screen-skeleton-webpack-plugin/tree/master/examples/sale)
 
 ### Installation
 
