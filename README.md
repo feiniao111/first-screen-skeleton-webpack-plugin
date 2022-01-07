@@ -29,8 +29,6 @@ fork自饿了么的[page-skeleton-webpack-plugin](https://github.com/ElemeFE/pag
 - 骨架屏生成算法调整，改用[京东dps](https://github.com/famanoder/dps),以优化体积
 - 参数优化，精简参数
 
-<h4 align="center">Loading animations</h4>
-
 ### Examples
 
 All examples are in the `examples` folder.
@@ -112,7 +110,7 @@ In the development page, use CtrlOrCmd + enter to call out the plugin interactiv
 
 Click the button in the interactive interface to preview the skeleton page. This process may take about 20s. After the plugin is ready for the skeleton page, it will automatically open the preview page through the browser, as shown below.
 
-![](./docs/step2.jpg)
+![](./docs/step2.png)
 
 Scan the QR code in the preview page to preview the skeleton page on the mobile phone. You can directly edit the source code on the preview page. Write the skeleton page into the shell.html file by clicking the Write button in the upper right corner.
 
