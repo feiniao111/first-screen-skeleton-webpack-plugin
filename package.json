@@ -1,7 +1,7 @@
 {
-  "name": "page-skeleton-webpack-plugin",
-  "version": "0.10.12",
-  "description": "web site skeleton generator",
+  "name": "first-screen-skeleton-webpack-plugin",
+  "version": "0.0.1",
+  "description": "首屏骨架屏生成注入webpack插件，支持多页面hash路由和单页面history路由，插件原型参考饿了么page-skeleton-webpack-plugin（https://github.com/ElemeFE/page-skeleton-webpack-plugin），骨架屏算法采用京东dps（https://github.com/famanoder/dps）",
   "main": "index.js",
   "scripts": {
     "lint": "eslint src client/{index,sockjs,utils}.js",
@@ -10,7 +10,7 @@
     "cover": "istanbul cover node_modules/mocha/bin/_mocha",
     "test": "npm run lint && npm run mocha",
     "dev:preview": "cross-env NODE_ENV=development webpack --color --config preview/webpack.preview.config.js --watch",
-    "dev:client": "cross-env NODE_ENV=development webpack ./client/index.js client/index.bundle.js --color --config client/webpack.config.js --watch",
+    "dev:client": "cross-env NODE_ENV=development webpack ./client/index.js -o client/index.bundle.js --color --config client/webpack.config.js --watch",
     "dev:sale": "cd examples/sale && npm run dev",
     "dev:script": "rollup --config src/script/rollup.config.js --watch",
     "build:index": "cross-env NODE_ENV=production webpack ./client/index.js -o client/index.bundle.js --color --config client/webpack.config.js",
@@ -21,10 +21,12 @@
   },
   "keywords": [
     "puppeteer",
+    "first screen",
     "page skeleton",
-    "webpack"
+    "webpack",
+    "multiple page"
   ],
-  "author": "jocs",
+  "author": "jianshengou@163.com",
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.4.1",

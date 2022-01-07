@@ -1,199 +1,324 @@
-import {
-  $$, $, getComputedStyle, checkHasPseudoEle, inViewPort, checkHasBorder,
-  isBase64Img, transparent, checkHasTextDecoration, removeElement, setOpacity
-} from './util'
-import {
-  DISPLAY_NONE, Node, EXT_REG, TRANSPARENT, GRADIENT_REG,
-  PRE_REMOVE_TAGS, MOCK_TEXT_ID, AFTER_REMOVE_TAGS, CONSOLE_SELECTOR
-} from './config'
-import * as handler from './handler/index.js'
-import { addSpin, addShine, addBlick } from './animation/index.js'
-import styleCache from './handler/styleCache'
+/**
+ * 参考 https://github.com/famanoder/dps
+ * 增加如下参数:
+ * render: bool // 默认false, 是否立即渲染到body中
+ * animationStyles: array // 动画style数组，例如 ['loading {to {background-position-x: -20%}}']。数组元素会依次 添加到 @keyframes下
+ */
+function evalDOM() {
+  const ELEMENTS = ['audio', 'button', 'canvas', 'code', 'img', 'input', 'pre', 'svg', 'textarea', 'video', 'xmp'];
+  const blocks = [];
+  const win_w = window.innerWidth;
+  const win_h = window.innerHeight;
 
-function traverse(options) {
-  const { remove, excludes, text, image, button, svg, grayBlock, pseudo, cssUnit, decimal } = options
-  const excludesEle = excludes.length ? Array.from($$(excludes.join(','))) : []
-  const grayEle = grayBlock.length ? Array.from($$(grayBlock.join(','))) : []
-  const rootElement = document.documentElement
+  let agrsArr = arguments;
+  if (!agrsArr.length) agrsArr = { length: 1, 0: {} };
+  let agrs = agrsArr[0];
 
-  const texts = []
-  const buttons = []
-  const hasImageBackEles = []
-  let toRemove = []
-  const imgs = []
-  const svgs = []
-  const pseudos = []
-  const gradientBackEles = []
-  const grayBlocks = []
-
-  if (Array.isArray(remove)) {
-    remove.push(CONSOLE_SELECTOR, ...PRE_REMOVE_TAGS)
-    toRemove.push(...$$(remove.join(',')))
+  if (agrsArr.length !== 1 || getArgtype(agrs) !== 'object') {
+    agrs = parseAgrs([...agrsArr]);
   }
 
-  if (button && button.excludes.length) {
-    // translate selector to element
-    button.excludes = Array.from($$(button.excludes.join(',')))
+  const classProps = {
+    position: 'fixed',
+    zIndex: 999,
+    background: agrs.background
+  }
+  if (agrs.animation) {
+    classProps.animation = agrs.animation;
   }
 
-  ;[svg, pseudo, image].forEach(type => {
-    if (type.shapeOpposite.length) {
-      type.shapeOpposite = Array.from($$(type.shapeOpposite.join(',')))
-    }
-  })
+  createCommonClass(classProps, agrs.animationStyles);
 
-  ;(function preTraverse(ele) {
-    const styles = getComputedStyle(ele)
-    const hasPseudoEle = checkHasPseudoEle(ele)
-    if (!inViewPort(ele) || DISPLAY_NONE.test(ele.getAttribute('style'))) {
-      return toRemove.push(ele)
-    }
-    if (~grayEle.indexOf(ele)) { // eslint-disable-line no-bitwise
-      return grayBlocks.push(ele)
-    }
-    if (~excludesEle.indexOf(ele)) return false // eslint-disable-line no-bitwise
+  function drawBlock({ width, height, top, left, zIndex = 999, background = agrs.background, radius, subClas } = {}) {
+    const styles = ['height:' + height + '%'];
 
-    if (hasPseudoEle) {
-      pseudos.push(hasPseudoEle)
+    if (!subClas) {
+      styles.push('top:' + top + '%', 'left:' + left + '%', 'width:' + width + '%');
     }
 
-    if (checkHasBorder(styles)) {
-      ele.style.border = 'none'
+    if (classProps.zIndex !== zIndex) {
+      styles.push('z-index:' + zIndex);
     }
 
-    if (ele.children.length > 0 && /UL|OL/.test(ele.tagName)) {
-      handler.list(ele)
-    }
-    if (ele.children && ele.children.length > 0) {
-      Array.from(ele.children).forEach(child => preTraverse(child))
+    if (classProps.background !== background) {
+      styles.push('background:' + background);
     }
 
-    // 将所有拥有 textChildNode 子元素的元素的文字颜色设置成背景色，这样就不会在显示文字了。
-    if (ele.childNodes && Array.from(ele.childNodes).some(n => n.nodeType === Node.TEXT_NODE)) {
-      transparent(ele)
-    }
-    if (checkHasTextDecoration(styles)) {
-      ele.style.textDecorationColor = TRANSPARENT
-    }
-    // 隐藏所有 svg 元素
-    if (ele.tagName === 'svg') {
-      return svgs.push(ele)
-    }
-    if (EXT_REG.test(styles.background) || EXT_REG.test(styles.backgroundImage)) {
-      return hasImageBackEles.push(ele)
-    }
-    if (GRADIENT_REG.test(styles.background) || GRADIENT_REG.test(styles.backgroundImage)) {
-      return gradientBackEles.push(ele)
-    }
-    if (ele.tagName === 'IMG' || isBase64Img(ele)) {
-      return imgs.push(ele)
-    }
-    if (
-      ele.nodeType === Node.ELEMENT_NODE &&
-      (ele.tagName === 'BUTTON' || (ele.tagName === 'A' && ele.getAttribute('role') === 'button'))
-    ) {
-      return buttons.push(ele)
-    }
-    if (
-      ele.childNodes &&
-      ele.childNodes.length === 1 &&
-      ele.childNodes[0].nodeType === Node.TEXT_NODE &&
-      /\S/.test(ele.childNodes[0].textContent)
-    ) {
-      return texts.push(ele)
-    }
-  }(rootElement))
-
-  svgs.forEach(e => handler.svg(e, svg, cssUnit, decimal))
-  texts.forEach(e => handler.text(e, text, cssUnit, decimal))
-  buttons.forEach(e => handler.button(e, button))
-  hasImageBackEles.forEach(e => handler.background(e, image))
-  imgs.forEach(e => handler.image(e, image))
-  pseudos.forEach(e => handler.pseudos(e, pseudo))
-  gradientBackEles.forEach(e => handler.background(e, image))
-  grayBlocks.forEach(e => handler.grayBlock(e, button))
-  // remove mock text wrapper
-  const offScreenParagraph = $(`#${MOCK_TEXT_ID}`)
-  if (offScreenParagraph && offScreenParagraph.parentNode) {
-    toRemove.push(offScreenParagraph.parentNode)
-  }
-  toRemove.forEach(e => removeElement(e))
-}
-
-function genSkeleton(options) {
-  const {
-    remove,
-    hide,
-    loading = 'spin'
-  } = options
-  /**
-   * before walk
-   */
-  // 将 `hide` 队列中的元素通过调节透明度为 0 来进行隐藏
-  if (hide.length) {
-    const hideEle = $$(hide.join(','))
-    Array.from(hideEle).forEach(ele => setOpacity(ele))
-  }
-  /**
-   * walk in process
-   */
-
-  traverse(options)
-  /**
-   * add `<style>`
-   */
-  let rules = ''
-
-  for (const [selector, rule] of styleCache) {
-    rules += `${selector} ${rule}\n`
+    radius && radius != '0px' && styles.push('border-radius:' + radius);
+    blocks.push(`<div class="_${subClas ? ' __' : ''}" style="${styles.join(';')}"></div>`);
   }
 
-  const styleEle = document.createElement('style')
+  function wPercent(x) {
+    return parseFloat(x / win_w * 100).toFixed(3);
+  }
 
-  if (!window.createPopup) { // For Safari
-    styleEle.appendChild(document.createTextNode(''))
+  function hPercent(x) {
+    return parseFloat(x / win_h * 100).toFixed(3);
   }
-    styleEle.innerHTML = rules
-  if (document.head) {
-    document.head.appendChild(styleEle)
-  } else {
-    document.body.appendChild(styleEle)
-  }
-  /**
-   * add animation of skeleton page when loading
-   */
-  switch (loading) {
-    case 'chiaroscuro':
-      addBlick()
-      break
-    case 'spin':
-      addSpin()
-      break
-    case 'shine':
-      addShine()
-      break
-    default:
-      addSpin()
-      break
-  }
-}
 
-function getHtmlAndStyle() {
-  const root = document.documentElement
-  const rawHtml = root.outerHTML
-  const styles = Array.from($$('style')).map(style => style.innerHTML || style.innerText)
-  Array.from($$(AFTER_REMOVE_TAGS.join(','))).forEach(ele => removeElement(ele))
-  // fix html parser can not handle `<div ubt-click=3659 ubt-data="{&quot;restaurant_id&quot;:1236835}" >`
-  // need replace `&quot;` into `'`
-  const cleanedHtml = document.body.innerHTML.replace(/&quot;/g, "'")
-  return {
-    rawHtml,
-    styles,
-    cleanedHtml
+  function noop() { }
+
+  function getArgtype(arg) {
+    return Object.prototype.toString.call(arg).toLowerCase().match(/\s(\w+)/)[1];
   }
+
+  function getStyle(node, attr) {
+    return (node.nodeType === 1 ? getComputedStyle(node)[attr] : '') || '';
+  }
+
+  function getRootNode(el) {
+    if (!el) return el;
+    return typeof el === 'object' ?
+      el :
+      (getArgtype(el) === 'string' ?
+        document.querySelector(el) :
+        null);
+  }
+
+  function includeElement(elements, node) {
+    return ~elements.indexOf((node.tagName || '').toLowerCase());
+  }
+
+  function isHideStyle(node) {
+    return getStyle(node, 'display') === 'none' ||
+      getStyle(node, 'visibility') === 'hidden' ||
+      getStyle(node, 'opacity') == 0 ||
+      node.hidden;
+  }
+
+  function isCustomCardBlock(node) {
+    const bgStyle = getStyle(node, 'background');
+    const bgColorReg = /rgba\([\s\S]+?0\)/ig;
+    const bdReg = /(0px)|(none)/;
+    const hasBgColor = !bgColorReg.test(bgStyle) || ~bgStyle.indexOf('gradient');
+    const hasNoBorder = ['top', 'left', 'right', 'bottom'].some(item => {
+      return bdReg.test(getStyle(node, 'border-' + item));
+    });
+    const { w, h } = getRect(node);
+    const customCardBlock = !!(hasBgColor && (!hasNoBorder || getStyle(node, 'box-shadow') != 'none') && w > 0 && h > 0 && w < 0.95 * win_w && h < 0.3 * win_h);
+    return customCardBlock;
+  }
+
+  function calcTextWidth(text, { fontSize, fontWeight } = {}) {
+    if (!text) return 0;
+
+    const div = document.createElement('div');
+    div.innerHTML = text;
+    div.style.cssText = [
+      'position:absolute',
+      'left:-99999px',
+      `height:${fontSize}`,
+      `font-size:${fontSize}`,
+      `font-weight:${fontWeight}`,
+      'opacity:0'
+    ].join(';');
+    document.body.appendChild(div);
+    const w = getStyle(div, 'width');
+    const h = getStyle(div, 'height');
+    document.body.removeChild(div);
+    return {
+      w: parseInt(w),
+      h: parseInt(h)
+    };
+  }
+
+  function getRect(node) {
+    if (!node) return {};
+    const { top: t, left: l, width: w, height: h } = node.getBoundingClientRect();
+    return { t, l, w, h };
+  }
+
+  function getPadding(node) {
+    return {
+      paddingTop: parseInt(getStyle(node, 'paddingTop')),
+      paddingLeft: parseInt(getStyle(node, 'paddingLeft')),
+      paddingBottom: parseInt(getStyle(node, 'paddingBottom')),
+      paddingRight: parseInt(getStyle(node, 'paddingRight'))
+    }
+  }
+
+  function createCommonClass(props, animationStyles = []) {
+    const inlineStyle = ['<style>._{'];
+    for (let prop in props) {
+      inlineStyle.push(`${prop === 'zIndex' ? 'z-index' : prop}:${props[prop]};`);
+    }
+    inlineStyle.push('}.__{top:0%;left:0%;width:100%;}');
+
+    if (animationStyles) {
+      for (let i = 0; i < animationStyles.length; i++) {
+        inlineStyle.push(`@keyframes ${animationStyles[i]}`)
+      }
+    }
+
+    inlineStyle.push('</style>');
+
+    blocks.push(inlineStyle.join(''));
+  }
+
+  function parseAgrs(agrs = []) {
+    let params = {};
+    agrs.forEach(agr => {
+      const sep = agr.indexOf(':');
+      const [appName, name, type] = agr.slice(0, sep).split('-');
+      const val = agr.slice(sep + 1);
+      params[name] = type === 'function' ? eval('(' + val + ')') :
+        type === 'object' ? JSON.parse(val) :
+          val;
+    });
+    return params;
+  }
+
+  function DrawPageframe(opts) {
+    this.rootNode = getRootNode(opts.rootNode) || document.body;
+    this.offsetTop = opts.offsetTop || 0;
+    this.includeElement = opts.includeElement;
+    this.init = opts.init;
+    this.originStyle = {};
+    this.render = opts.render || false; // 是否渲染到body中
+
+    return this instanceof DrawPageframe ? this : new DrawPageframe(opts);
+  }
+
+  DrawPageframe.prototype = {
+    resetDOM: function () {
+      this.init && this.init();
+      this.originStyle = {
+        scrollTop: window.scrollY,
+        bodyOverflow: getStyle(document.body, 'overflow')
+      };
+      window.scrollTo(0, this.offsetTop);
+      document.body.style.cssText += 'overflow:hidden!important;';
+      drawBlock({
+        height: 100,
+        zIndex: 990,
+        background: '#fff',
+        subClas: true
+      });
+      this.withHeader();
+    },
+    inHeader: function (node) {
+      if (agrs.header) {
+        const height = parseInt(agrs.header.height);
+        if (height) {
+          const { t, l, w, h } = getRect(node);
+          return t <= height;
+        }
+      }
+    },
+    withHeader: function () {
+      if (agrs.header) {
+        const { height, background } = agrs.header;
+        const hHeight = parseInt(height);
+        const hBackground = background || agrs.background;
+        if (hHeight) {
+          drawBlock({
+            height: hPercent(hHeight),
+            zIndex: 999,
+            background: hBackground,
+            subClas: true
+          });
+        }
+      }
+    },
+    showBlocks: function () {
+      if (blocks.length) {
+        const { body } = document;
+
+        const blocksHTML = blocks.join('');
+        if (!this.render) {
+          return blocksHTML;
+        }
+        const div = document.createElement('div');
+        div.innerHTML = blocksHTML;
+        body.appendChild(div);
+
+        window.scrollTo(0, this.originStyle.scrollTop);
+        document.body.style.overflow = this.originStyle.bodyOverflow;
+
+        return blocksHTML;
+      }
+    },
+
+    startDraw: function () {
+      const $this = this;
+      this.resetDOM();
+      const nodes = this.rootNode.childNodes;
+      const appendClassname = this.appendClassname;
+
+      function deepFindNode(nodes) {
+        if (nodes.length) {
+          for (let i = 0; i < nodes.length; i++) {
+
+            let node = nodes[i];
+            if (isHideStyle(node) || (getArgtype($this.includeElement) === 'function' && $this.includeElement(node, drawBlock) == false)) continue;
+            let childNodes = node.childNodes;
+            let hasChildText = false;
+            let background = getStyle(node, 'backgroundImage');
+            let backgroundHasurl = background.match(/url\(.+?\)/);
+
+            backgroundHasurl = backgroundHasurl && backgroundHasurl.length;
+
+            for (let j = 0; j < childNodes.length; j++) {
+              if (childNodes[j].nodeType === 3 && childNodes[j].textContent.trim().length) {
+                hasChildText = true;
+                break;
+              }
+            }
+
+            if ((includeElement(ELEMENTS, node) ||
+              backgroundHasurl ||
+              (node.nodeType === 3 && node.textContent.trim().length) || hasChildText ||
+              isCustomCardBlock(node)) && !$this.inHeader(node)) {
+              const { t, l, w, h } = getRect(node);
+
+              if (w > 0 && h > 0 && l >= 0 && l < win_w && win_h - t >= 20 && t >= 0) {
+                const {
+                  paddingTop,
+                  paddingLeft,
+                  paddingBottom,
+                  paddingRight
+                } = getPadding(node);
+                drawBlock({
+                  width: wPercent(w - paddingLeft - paddingRight),
+                  height: hPercent(h - paddingTop - paddingBottom),
+                  top: hPercent(t + paddingTop),
+                  left: wPercent(l + paddingLeft),
+                  radius: getStyle(node, 'border-radius'),
+                  appendClassname: appendClassname
+                });
+              }
+            } else if (childNodes && childNodes.length) {
+              if (!hasChildText) {
+                deepFindNode(childNodes);
+              }
+            }
+          }
+        }
+      }
+
+      deepFindNode(nodes);
+      return this.showBlocks();
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        const html = new DrawPageframe({
+          init: agrs.init,
+          rootNode: agrs.rootNode,
+          includeElement: agrs.includeElement,
+          render: agrs.render
+        }).startDraw();
+        resolve(html);
+      } catch (e) {
+        reject(e);
+      }
+    }, 1000);
+  });
+
 }
 
 export {
-  genSkeleton,
-  getHtmlAndStyle
+  evalDOM
 }

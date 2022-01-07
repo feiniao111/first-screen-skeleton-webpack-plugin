@@ -49,12 +49,10 @@ class Skeleton {
 
   // Generate the skeleton screen for the specific `page`
   async makeSkeleton(page) {
-    const { defer } = this.options
+    const { defer, htmlOption } = this.options
     await page.addScriptTag({ content: this.scriptContent })
     await sleep(defer)
-    await page.evaluate((options) => {
-      Skeleton.genSkeleton(options)
-    }, this.options)
+    return await page.evaluate((htmlOption) => Skeleton.evalDOM(htmlOption), htmlOption)
   }
 
   async genHtml(url, route) {
@@ -128,140 +126,47 @@ class Skeleton {
     }
 
 
-    await this.makeSkeleton(page)
+    const res = await this.makeSkeleton(page)
 
-    const { styles, cleanedHtml } = await page.evaluate(() => Skeleton.getHtmlAndStyle())
-
-    const stylesheetAstArray = styles.map((style) => {
-      const ast = parse(style, {
-        parseValue: false,
-        parseRulePrelude: false
-      })
-      return toPlainObject(ast)
-    })
-
-    const cleanedCSS = await page.evaluate(async (stylesheetAstObjects, stylesheetAstArray) => { // eslint-disable-line no-shadow
-      const DEAD_OBVIOUS = new Set(['*', 'body', 'html'])
-      const cleanedStyles = []
-
-      const checker = (selector) => {
-        if (DEAD_OBVIOUS.has(selector)) {
-          return true
-        }
-        if (/:-(ms|moz)-/.test(selector)) {
-          return true
-        }
-        if (/:{1,2}(before|after)/.test(selector)) {
-          return true
-        }
-        try {
-          const keep = !!document.querySelector(selector)
-          return keep
-        } catch (err) {
-          const exception = err.toString()
-          console.log(`Unable to querySelector('${selector}') [${exception}]`, 'error') // eslint-disable-line no-console
-          return false
-        }
-      }
-
-      const cleaner = (ast, callback) => {
-        const decisionsCache = {}
-
-        const clean = (children, cb) => children.filter((child) => {
-          if (child.type === 'Rule') {
-            const values = child.prelude.value.split(',').map(x => x.trim())
-            const keepValues = values.filter((selectorString) => {
-              if (decisionsCache[selectorString]) {
-                return decisionsCache[selectorString]
-              }
-              const keep = cb(selectorString)
-              decisionsCache[selectorString] = keep
-              return keep
-            })
-            if (keepValues.length) {
-              // re-write the selector value
-              child.prelude.value = keepValues.join(', ')
-              return true
-            }
-            return false
-          } else if (child.type === 'Atrule' && child.name === 'media') {
-            // recurse
-            child.block.children = clean(child.block.children, cb)
-            return child.block.children.length > 0
-          }
-          // The default is to keep it.
-          return true
-        })
-
-        ast.children = clean(ast.children, callback)
-        return ast
-      }
-
-      const links = Array.from(document.querySelectorAll('link'))
-
-      links
-        .filter(link => (
-          link.href &&
-            (link.rel === 'stylesheet' ||
-              link.href.toLowerCase().endsWith('.css')) &&
-            !link.href.toLowerCase().startsWith('blob:') &&
-            link.media !== 'print'
-        ))
-        .forEach((stylesheet) => {
-          if (!stylesheetAstObjects[stylesheet.href]) {
-            throw new Error(`${stylesheet.href} not in stylesheetAstObjects`)
-          }
-          if (!Object.keys(stylesheetAstObjects[stylesheet.href]).length) {
-            // If the 'stylesheetAstObjects[stylesheet.href]' thing is an
-            // empty object, simply skip this link.
-            return
-          }
-          const ast = stylesheetAstObjects[stylesheet.href]
-          cleanedStyles.push(cleaner(ast, checker))
-        })
-      stylesheetAstArray.forEach((ast) => {
-        cleanedStyles.push(cleaner(ast, checker))
-      })
-
-      return cleanedStyles
-    }, stylesheetAstObjects, stylesheetAstArray)
-
-    const allCleanedCSS = cleanedCSS.map((ast) => {
-      const cleanedAst = fromPlainObject(ast)
-      return generate(cleanedAst)
-    }).join('\n')
-
-    const finalCss = collectImportantComments(allCleanedCSS)
-    // finalCss = minify(finalCss).css ? `html-minifier` use `clean-css` as css minifier
-    // so don't need to use another mimifier.
     let shellHtml = `<!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
         <title>Page Skeleton</title>
-        <style>
-          $$css$$
-        </style>
+          $$style$$
       </head>
       <body>
         $$html$$
       </body>
       </html>`
     shellHtml = shellHtml
-      .replace('$$css$$', finalCss)
-      .replace('$$html$$', cleanedHtml)
+      .replace('$$style$$', res.substring(0, res.indexOf('</style>') + 8))
+      .replace('$$html$$', res.substring(res.indexOf('</style>') + 8))
     const result = {
       originalRoute: route,
-      route: await page.evaluate('window.location.pathname'),
+      route: this.options.routeMode == 'history' ? await page.evaluate('window.location.pathname') : (await page.evaluate('window.location.hash')).replace('#', ''),
       html: htmlMinify(shellHtml, false)
     }
     await this.closePage(page)
     return Promise.resolve(result)
   }
 
-  async renderRoutes(origin, routes = this.options.routes) {
-    return Promise.all(routes.map((route) => {
-      const url = `${origin}${route}`
+  async renderRoutes(origin, sklWriteDir, routes = this.options.routes) {
+    let curRoutes = routes
+    if (typeof(routes[0]) == 'object') { // 多入口场景，routes是元素为对象的数组
+      let isNoMatch = true
+      for (let i = 0; i < routes.length; i++) {
+        if (!!routes[i][sklWriteDir]) {
+          isNoMatch = false
+          curRoutes = routes[i][sklWriteDir]
+          break
+        }
+      }
+      curRoutes = isNoMatch ? [] : curRoutes
+    }
+    return Promise.all(curRoutes.map((route) => {
+      const { routeMode = 'history' } = this.options // 增加hash路由支持
+      const url = routeMode == 'hash' ? `${origin}#${route}` : `${origin}${route}`
       return this.genHtml(url, route)
     }))
   }

@@ -21,7 +21,11 @@ module.exports = {
       test: /\.js$/,
       use: {
         loader: 'babel-loader'
-      }
+      },
+      // exclude: [
+      //   /node_modules\/(webpack|html-webpack-plugin)\//,
+      // ],
+      exclude: /node_modules/ // TODO: 发布为插件时，这句话要去除
     }, {
       test: /\.vue$/,
       loader: 'vue-loader',
@@ -33,7 +37,7 @@ module.exports = {
       use: [
         process.env.NODE_ENV === 'production' ? MiniCssExtractPlugin.loader : 'style-loader',
         "css-loader"
-      ]
+      ],
     }, {
       test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
       loader: 'url-loader',

@@ -28,9 +28,10 @@ async function writeShell(routesData, options) {
   const { pathname, minify: minOptions } = options
   return Promise.all(Object.keys(routesData).map(async (route) => {
     const html = routesData[route].html
+    const sklWriteDir = routesData[route].sklWriteDir
     const minifiedHtml = htmlMinify(getCleanedShellHtml(html), minOptions)
     const trimedRoute = route.replace(/\//g, '')
-    const filePath = path.join(pathname, trimedRoute ? `${trimedRoute}.html` : 'index.html')
+    const filePath = path.join(pathname, sklWriteDir.replace('.html', ''), trimedRoute ? `${trimedRoute}.html` : 'index.html')
     await fse.ensureDir(pathname)
     await promisify(fs.writeFile)(filePath, minifiedHtml, 'utf-8')
     return Promise.resolve()
@@ -49,12 +50,13 @@ async function genScriptContent() {
   return result
 }
 // add script tag into html string, just as document.body.appendChild(script)
-function addScriptTag(source, src, port) {
+function addScriptTag(source, src, port, outputName) {
   const token = source.split('</body>')
   if (token.length < 2) return source
   const scriptTag = `
     <script>
       window._pageSkeletonSocketPort = ${port}
+      window._pageSkeletonOutputDir = '${outputName}' // 骨架屏写回目录
     </script>
     <script type="text/javascript" src="${src}" defer></script>
     `
@@ -109,14 +111,28 @@ const collectImportantComments = (css) => {
   return combined.join('\n')
 }
 
-const outputSkeletonScreen = async (originHtml, options, log) => {
+const outputSkeletonScreen = async (originHtmlInfo, options, log) => {
   const { pathname, staticDir, routes } = options
-  return Promise.all(routes.map(async (route) => {
+  const { html: originHtml, outputName } = originHtmlInfo
+  const dir = outputName.substring(0, outputName.lastIndexOf('.'))
+  let curRoutes = routes
+  if (typeof(routes[0]) == 'object') { // 多入口场景，routes是元素为对象的数组
+    let isNoMatch = true
+    for (let i = 0; i < routes.length; i++) {
+      if (!!routes[i][outputName]) {
+        isNoMatch = false
+        curRoutes = routes[i][outputName]
+        break
+      }
+    }
+    curRoutes = isNoMatch ? [] : curRoutes
+  }
+  return Promise.all(curRoutes.map(async (route) => {
     const trimedRoute = route.replace(/\//g, '')
-    const filePath = path.join(pathname, trimedRoute ? `${trimedRoute}.html` : 'index.html')
+    const filePath = path.join(pathname, trimedRoute ? `${dir}/${trimedRoute}.html` : `${dir}/index.html`)
     const html = await promisify(fs.readFile)(filePath, 'utf-8')
     const finalHtml = originHtml.replace('<!-- shell -->', html)
-    const outputDir = path.join(staticDir, route)
+    const outputDir = path.join(staticDir, dir, route)
     const outputFile = path.join(outputDir, 'index.html')
     await fse.ensureDir(outputDir)
     await promisify(fs.writeFile)(outputFile, finalHtml, 'utf-8')

@@ -1,3 +1,6 @@
+/**
+ * 测试用例fork自page-skeleton-webpage-plugin，暂未修改
+ */
 const path = require('path')
 const { promisify } = require('util')
 const fs = require('fs')

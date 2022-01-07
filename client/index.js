@@ -6,6 +6,7 @@ import { log } from './utils'
 import Console from './components/console/index.vue'
 
 const port = window._pageSkeletonSocketPort // eslint-disable-line no-underscore-dangle
+const sklWriteDir = window._pageSkeletonOutputDir
 
 // TODO headless 打开的页面不连接 socket
 const sock = new SockJS(`http://localhost:${port}/socket`)
@@ -83,7 +84,8 @@ function createView(sock) {
     methods: {
       handleClick() {
         this.text = 'IN PROGRESS...'
-        sock.send(JSON.stringify({ type: 'generate', data: window.location.origin }))
+        // sock.send(JSON.stringify({ type: 'generate', data: window.location.origin }))
+        sock.send(JSON.stringify({ type: 'generate', data: `${window.location.origin}${window.location.pathname}`, sklWriteDir: sklWriteDir }))
       }
     }
   })
