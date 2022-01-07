@@ -52,7 +52,7 @@ class Skeleton {
     const { defer, htmlOption } = this.options
     await page.addScriptTag({ content: this.scriptContent })
     await sleep(defer)
-    return await page.evaluate((htmlOption) => Skeleton.evalDOM(htmlOption), htmlOption)
+    return await page.evaluate(htmlOption => Skeleton.evalDOM(htmlOption), htmlOption)
   }
 
   async genHtml(url, route) {
@@ -153,10 +153,10 @@ class Skeleton {
 
   async renderRoutes(origin, sklWriteDir, routes = this.options.routes) {
     let curRoutes = routes
-    if (typeof(routes[0]) == 'object') { // 多入口场景，routes是元素为对象的数组
+    if (typeof (routes[0]) === 'object') { // 多入口场景，routes是元素为对象的数组
       let isNoMatch = true
       for (let i = 0; i < routes.length; i++) {
-        if (!!routes[i][sklWriteDir]) {
+        if (routes[i][sklWriteDir]) {
           isNoMatch = false
           curRoutes = routes[i][sklWriteDir]
           break

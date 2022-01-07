@@ -85,7 +85,7 @@ function createView(sock) {
       handleClick() {
         this.text = 'IN PROGRESS...'
         // sock.send(JSON.stringify({ type: 'generate', data: window.location.origin }))
-        sock.send(JSON.stringify({ type: 'generate', data: `${window.location.origin}${window.location.pathname}`, sklWriteDir: sklWriteDir }))
+        sock.send(JSON.stringify({ type: 'generate', data: `${window.location.origin}${window.location.pathname}`, sklWriteDir }))
       }
     }
   })

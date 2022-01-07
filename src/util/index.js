@@ -116,10 +116,10 @@ const outputSkeletonScreen = async (originHtmlInfo, options, log) => {
   const { html: originHtml, outputName } = originHtmlInfo
   const dir = outputName.substring(0, outputName.lastIndexOf('.'))
   let curRoutes = routes
-  if (typeof(routes[0]) == 'object') { // 多入口场景，routes是元素为对象的数组
+  if (typeof (routes[0]) === 'object') { // 多入口场景，routes是元素为对象的数组
     let isNoMatch = true
     for (let i = 0; i < routes.length; i++) {
-      if (!!routes[i][outputName]) {
+      if (routes[i][outputName]) {
         isNoMatch = false
         curRoutes = routes[i][outputName]
         break

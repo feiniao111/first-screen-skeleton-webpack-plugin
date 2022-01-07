@@ -38,7 +38,7 @@ SkeletonPlugin.prototype.insertScriptToClient = function (htmlPluginData) { // e
 }
 
 SkeletonPlugin.prototype.outputSkeletonScreen = async function () { // eslint-disable-line func-names
-  for(let i = 0; i < this.originalHtmlInfo.length; i++) {
+  for (let i = 0; i < this.originalHtmlInfo.length; i++) {
     try {
       await outputSkeletonScreen(this.originalHtmlInfo[i], this.options, this.server.log.info)
     } catch (err) {
@@ -90,7 +90,7 @@ SkeletonPlugin.prototype.apply = function (compiler) { // eslint-disable-line fu
         callback(null, htmlPluginData)
       })
       compilation.plugin('html-webpack-plugin-after-html-processing', (htmlPluginData, callback) => {
-        let tmp = this.originalHtmlInfo.filter(item => item.outputName == htmlPluginData.outputName)
+        const tmp = this.originalHtmlInfo.filter(item => item.outputName == htmlPluginData.outputName)
         if (tmp.length == 0) {
           this.originalHtmlInfo.push({
             html: htmlPluginData.html,

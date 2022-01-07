@@ -13,78 +13,21 @@
 <hr />
 
 <div align="center">
-  <!-- Version -->
-  <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin">
-    <img src="https://badge.fury.io/gh/elemefe%2Fpage-skeleton-webpack-plugin.svg" alt="website">
-  </a>
-  <!-- License -->
-  <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin">
-    <img src="https://img.shields.io/github/license/ElemeFE/page-skeleton-webpack-plugin.svg?style=flat-square" alt="LICENSE">
-  </a>
-  <!-- Build Status -->
-  <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin">
-    <img src="https://travis-ci.org/ElemeFE/page-skeleton-webpack-plugin.svg?branch=master" alt="build">
-  </a>
-  <!-- Downloads monthly -->
-  <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin">
-    <img src="https://img.shields.io/npm/dm/page-skeleton-webpack-plugin.svg?style=flat-square" alt="download">
-  </a>
-</div>
-
-<div align="center">
- <a href="https://nodei.co/npm/page-skeleton-webpack-plugin/"><img src="https://nodei.co/npm/page-skeleton-webpack-plugin.png?downloads=true&downloadRank=true&stars=true"></a>
-</div>
-
-<div align="center">
-
-  <h3>
-    <a href="https://zhuanlan.zhihu.com/p/34702561">
-      Blog
-    </a>
-   <span> | </span>
-    <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin/blob/master/docs/i18n/zh_cn.md">
-      中文
-    </a>
-   <span> | </span>
-    <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin#features">
-      Features
-    </a>
-   <span> | </span>
-​    <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin#examples">
-      Examples
-    </a>
-​    <span> | </span>
-    <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin#installation">
-      Install
-    </a>
-    <span> | </span>
-    <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin#basic-use">
-      Basic Use
-    </a>
-    <span> | </span>
-    <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin#documents">
-      Documents
-    </a>
-    <span> | </span>
-    <a href="https://github.com/ElemeFE/page-skeleton-webpack-plugin#contribution">
-      Contribution
-    </a>
-  </h3>
+ <a href="https://nodei.co/npm/first-screen-skeleton-webpack-plugin/"><img src="https://nodei.co/npm/first-screen-skeleton-webpack-plugin.png?downloads=true&downloadRank=true&stars=true"></a>
 </div>
 
 <br />
 
-![](https://github.com/ElemeFE/page-skeleton-webpack-plugin/raw/master/docs/workflow.gif)
+![](https://https://github.com/feiniao111/first-screen-skeleton-webpack-plugin/raw/master/docs/workflow.gif)
 
 ### Features
 
-Page Skeleton is a webpack plugin.The purpose of the plugin is to generate the corresponding skeleton screen page according to different route pages in your project, and to pack the skeleton screen page into the corresponding static route page through webpack.
+fork自饿了么的[page-skeleton-webpack-plugin](https://github.com/ElemeFE/page-skeleton-webpack-plugin)项目，但做出如下改变：
 
-- Support multiple loading animations
-- Preview on mobile
-- Support multiple routes
-- Can be customized, and also directly modify the skeleton page source code in the preview page
-- Almost zero configuration available
+- 除history路由外，支持hash路由
+- 支持多入口页面
+- 骨架屏生成算法调整，改用[京东dps](https://github.com/famanoder/dps),以优化体积
+- 参数优化，精简参数
 
 <h4 align="center">Loading animations</h4>
 
@@ -104,7 +47,7 @@ All examples are in the `examples` folder.
 
 Use `npm` to install this plugin, and you also need to install [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin).
 
-> npm install --save-dev page-skeleton-webpack-plugin
+> npm install --save-dev first-screen-skeleton-webpack-plugin
 > 
 > npm install --save-dev html-webpack-plugin
 
@@ -116,7 +59,7 @@ After installing the plug-in according to the above tutorial, you need to config
 
 ```javascript
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { SkeletonPlugin } = require('page-skeleton-webpack-plugin')
+const { SkeletonPlugin } = require('first-screen-skeleton-webpack-plugin')
 const path = require('path')
 const webpackConfig = {
   entry: 'index.js',
@@ -131,7 +74,7 @@ const webpackConfig = {
     new SkeletonPlugin({
         pathname: path.resolve(__dirname, `${customPath}`), // the path to store shell file
         staticDir: path.resolve(__dirname, './dist'), // the same as the `output.path`
-        routes: ['/', '/search'], // Which routes you want to generate skeleton screen
+        routes: [{'index.html': ['/index']}], // Which routes you want to generate skeleton screen。支持多入口。如果是单入口页面，也可以这么传： routes: ['/', '/search']
     })
   ]
 }
@@ -189,10 +132,9 @@ Re-package the application with webpack. When the page is restarted, you can see
 | --------- | --------------- | --------- | ------------ | ------------------------------------------------------------ |
 | pathname  | String          | Yes       | None         | Where the shell.html file shoud be output.                   |
 | staticDir | String          | Yes       | None         | Path to output static route page                             |
-| routes    | Array           | Yes       | None         | Route in `routes ` will generate static route with skeleton screen, please refer to [**sale**](https://github.com/ElemeFE/page-skeleton-webpack-plugin/tree/master/examples/sale) |
+| routes    | Array           | Yes       | None         | Route in `routes ` will generate static route with skeleton screen|
 | Port      | String          | No        | 8989         | The port of Page Skeleton server                             |
 | debug     | Boolean         | No        | `true`       | Whether debug mode is enabled or not, when debug is true, the output of the headless Chromium console will be output on the terminal. |
-| minify    | false or Object | No        | See defaults | The plug-in will uglify the generated shell.html file by default. You can pass [html-minifier](https://github.com/kangax/html-minifier) configuration parameters to mimify shell.html. When configured to false , the generated shell.html file is not uglified and the shell.html file is formatted. |
 | logLevel  | String          | No        | `info`       | Which type of messages you want to print in terminal, the optional values are `info`, `warn` and default value is `info`. |
 | quiet     | Boolean         | No        | `false`      | Whether to print messages on the terminal, when set to true, no messages are printed. |
 | noInfo    | Boolean         | No        | `false`      | When the value is `true`, plugin will not print `info` message. |
@@ -202,18 +144,21 @@ Re-package the application with webpack. When the page is restarted, you can see
 
 | Option    | Type   | Required | Default      | Description                                                  |
 | --------- | ------ | -------- | ------------ | ------------------------------------------------------------ |
-| loading   | String | No       | spin         | Animations of skeleton page,  enumerated values:`spin` `chiaroscuro` `shine` |
-| text      | Object | No       | See defaults | The configuration object can be configured with a color field that determines the color of the text block in the skeleton page. The color value supports hexadecimal, RGB, and so on. |
-| image     | Object | No       | See defaults | This configuration accepts 3 properties, color, shape, and shapeOpposite. Color and shape are used to determine the color and shape of the image block in the skeleton page. The color value supports hexadecimal and RGB. The shape supports two enumeration values, `circle` and `rect`. The shapeOpposite field takes an array. Each element in the array is a DOM selector. It is used to select the DOM element. The shape of the selected DOM will be opposite to the configured shape. For example, if the configuration is rect, the image block in the shapeOpposite will be In the skeleton page is displayed as a circle shape (circular), how to configure can refer to the default configuration at the end of this section. |
-| button    | Object | No       | See defaults | This configuration accepts two fields, `color` and `excludes`. Color is used to determine the color of the button block in the skeleton page. excludes accepts an array. The elements in the array are DOM selectors used to select elements. The elements in the array will not be considered button blocks. |
-| svg       | Object | No       | See defaults | This configuration accepts 3 fields, `color`, `shape`, and `shapeOpposite`. Color and shape are used to determine the color and shape of the svg block in the skeleton page. The color value supports hexadecimal and RGB, and also supports the `transparent` enumeration value. After setting to transparent, the svg block will be a transparent block. Shapes support two enumeration values, `circle` and `rect`. The shapeOpposite field accepts an array. Each element in the array is a DOM selector for selecting the DOM element. The shape of the selected DOM will be the opposite of the configured shape shape. For example, if the configuration is rect then the svg block in the shapeOpposite will be In the skeleton page is displayed as a circle shape (circular). |
-| pseudo    | Object | No       | See defaults | This configuration accepts two fields, `color` and `shape`. Color is used to determine the color of the skeletal page that is treated as a pseudo-element block, and shape is used to set the shape of the pseudo-element block, accepting two enum values: `circle` and `rect`. |
-| excludes  | Array  | No       | `[]`         | If you have an element that does not require skeleton processing, write the element's CSS selector in the array. |
-| remove    | Array  | No       | `[]`         | If you have elements that need to be removed from the DOM are configured with a CSS selector that will be removed in DOM tree. |
-| hide      | Array  | No       | `[]`         | Don't want to remove it, but hide the element by setting its transparency to 0 and config element's CSS selector in the array. |
-| grayBlock | Array  | No       | `[]`         | The elements in the array are CSS selectors. The selected element will be processed by the plug-in into a color block. The color of the color block is the same as the color of the button block. Internal elements will no longer be specially treated and text will be hidden. |
-| cssUnit   | String | No       | `rem`        | The enum values it accepts are `rem`, `vw`, `vh`, `vmin`, `vmax`. |
-| decimal   | Number | No       | 4            | Config the decimal of the css value in the skeleton page (shell.html). The default value is 4. |
+| htmlOption| Object | No       | 具体见下面    | 控制骨架屏参数                                                |
+
+
+**htmlOption Options**  
+| Option    | Type   | Required | Default      | Description                                                  |
+| --------- | ------ | -------- | ------------ | ------------------------------------------------------------ |
+| background| String | No       | '180% / 200% 100% linear-gradient(100deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, .5) 50%, rgba(255, 255, 255, 0) 60%) #ededed' | CSS 背景 |
+| render    | Boolean| No       | false | 是否立即渲染到页面上 |
+| animation | String | No       | 'loading 2s linear infinite' | CSS 动画 |
+| animationStyles    | Array | No       | ['loading {to {background-position-x: -20%}}'] | CSS 动画style数组。数组元素会依次 添加到 @keyframes下 |
+| init      | Function| No      | None         | 开始生成之前的操作                                  	          |
+|includeElement(node, draw) | Function | No | None | 定制某个节点如何生成                                       |
+| header.height | String | NO | None | 主题header的高 |
+| header.background | String | NO | None | 主题header的背景色 |
+| includeElement(node, draw) | Function | NO | None | 定制某个节点如何生成 |
 
 **Puppeteer Options**
 
@@ -240,7 +185,13 @@ const pluginDefaultConfig = {
   logLevel: 'info',
   quiet: false,
   noInfo: false,
-  logTime: true
+  logTime: true,
+    htmlOption: { // 控制骨架屏参数
+    background: '180% / 200% 100% linear-gradient(100deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, .5) 50%, rgba(255, 255, 255, 0) 60%) #ededed',
+    render: false, // 是否立即渲染到页面上
+    animation: 'loading 2s linear infinite', // 动画
+    animationStyles: ['loading {to {background-position-x: -20%}}']
+  }
 }
 ```
 
@@ -259,10 +210,10 @@ Special thanks to @Yasujizr who designed the banner of Page Skeleton.
 
 **Maintainer**
 
-[![Jocs](https://avatars0.githubusercontent.com/u/9712830?s=150&v=4)](https://github.com/Jocs)
+jianshengou@163.com
 
 ### License
 
  [**MIT**](https://github.com/ElemeFE/page-skeleton-webpack-plugin/blob/master/LICENSE).
 
-Copyright (c) 2017-present, @ElemeFE
+

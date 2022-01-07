@@ -25,7 +25,7 @@ module.exports = {
       // exclude: [
       //   /node_modules\/(webpack|html-webpack-plugin)\//,
       // ],
-      exclude: /node_modules/ // TODO: 发布为插件时，这句话要去除
+      exclude: /node_modules/
     }, {
       test: /\.vue$/,
       loader: 'vue-loader',
