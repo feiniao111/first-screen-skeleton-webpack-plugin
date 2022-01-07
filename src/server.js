@@ -134,14 +134,16 @@ class Server extends EventEmitter {
       const msg = JSON.parse(data)
       switch (msg.type) {
         case 'generate': {
-          if (!msg.data) return log.info(msg)
+          if (!msg.data || !msg.sklWriteDir) return log.info(msg)
           this.origin = msg.data
+          this.sklWriteDir = msg.sklWriteDir
           const origin = msg.data
           const preGenMsg = 'begin to generator skeleton screen'
           log.info(preGenMsg)
           sockWrite(this.sockets, 'console', preGenMsg)
           try {
-            const skeletonScreens = await this.skeleton.renderRoutes(origin)
+            const skeletonScreens = await this.skeleton.renderRoutes(origin, this.sklWriteDir)
+            const { routeMode = 'history' } = this.options // 增加hash路由支持
             // CACHE html
             this.routesData = {}
             /* eslint-disable no-await-in-loop */
@@ -149,10 +151,11 @@ class Server extends EventEmitter {
               const fileName = await this.writeMagicHtml(html)
               const skeletonPageUrl = `http://${this.host}:${this.port}/${fileName}`
               this.routesData[route] = {
-                url: origin + route,
+                url: routeMode == 'history' ? origin + route : `${origin}#${route}`,
                 skeletonPageUrl,
                 qrCode: await generateQR(skeletonPageUrl),
-                html
+                html,
+                sklWriteDir: this.sklWriteDir
               }
             }
             /* eslint-ensable no-await-in-loop */
