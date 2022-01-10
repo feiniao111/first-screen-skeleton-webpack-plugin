@@ -125,6 +125,7 @@ Re-package the application with webpack. When the page is restarted, you can see
 | pathname  | String          | Yes       | None         | Where the shell.html file shoud be output.                   |
 | staticDir | String          | Yes       | None         | Path to output static route page                             |
 | routes    | Array           | Yes       | None         | Route in `routes ` will generate static route with skeleton screen|
+| routeMode | String          | No        | `hash`       | 路由模式。 hash | history
 | Port      | String          | No        | 8989         | The port of Page Skeleton server                             |
 | debug     | Boolean         | No        | `true`       | Whether debug mode is enabled or not, when debug is true, the output of the headless Chromium console will be output on the terminal. |
 | logLevel  | String          | No        | `info`       | Which type of messages you want to print in terminal, the optional values are `info`, `warn` and default value is `info`. |
@@ -142,10 +143,10 @@ Re-package the application with webpack. When the page is restarted, you can see
 **htmlOption Options**  
 | Option    | Type   | Required | Default      | Description                                                  |
 | --------- | ------ | -------- | ------------ | ------------------------------------------------------------ |
-| background| String | No       | '180% / 200% 100% linear-gradient(100deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, .5) 50%, rgba(255, 255, 255, 0) 60%) #ededed' | CSS 背景 |
-| render    | Boolean| No       | false | 是否立即渲染到页面上 |
-| animation | String | No       | 'loading 2s linear infinite' | CSS 动画 |
-| animationStyles    | Array | No       | ['loading {to {background-position-x: -20%}}'] | CSS 动画style数组。数组元素会依次 添加到 @keyframes下 |
+| background| String | No       | `180% / 200% 100% linear-gradient(100deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, .5) 50%, rgba(255, 255, 255, 0) 60%) #ededed` | CSS 背景 |
+| render    | Boolean| No       | `false` | 是否立即渲染到页面上 |
+| animation | String | No       | `loading 2s linear infinite` | CSS 动画 |
+| animationStyles    | Array | No       | [`loading {to {background-position-x: -20%}}`] | CSS 动画style数组。数组元素会依次 添加到 @keyframes下 |
 | init      | Function| No      | None         | 开始生成之前的操作                                  	          |
 |includeElement(node, draw) | Function | No | None | 定制某个节点如何生成                                       |
 | header.height | String | NO | None | 主题header的高 |

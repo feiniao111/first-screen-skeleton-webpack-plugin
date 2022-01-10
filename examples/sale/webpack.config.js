@@ -76,7 +76,7 @@ module.exports = {
     new SkeletonPlugin({
       pathname: path.resolve(__dirname, `./shell`),
       staticDir: path.resolve(__dirname, './dist'),
-      routes: ['/'],
+      routes: ['/', '/search'],
       port: '7890'
     }),
   ],

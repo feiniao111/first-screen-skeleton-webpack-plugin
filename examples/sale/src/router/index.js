@@ -7,7 +7,7 @@ import search from '../pages/search.vue'
 Vue.use(Router)
 
 const router = new Router({
-  mode: 'history',
+  mode: 'hash',
   routes: [
     {
       path: '/',

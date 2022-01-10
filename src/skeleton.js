@@ -75,8 +75,8 @@ class Skeleton {
     page.on('response', (response) => {
       const requestUrl = response.url()
       const ct = response.headers()['content-type'] || ''
-      if (response.ok && !response.ok()) {
-        throw new Error(`${response.status} on ${requestUrl}`)
+      if (response.ok && !response.ok() && response.status() != 304) {
+        throw new Error(`${response.status()} on ${requestUrl}`)
       }
 
       if (ct.indexOf('text/css') > -1 || /\.css$/i.test(requestUrl)) {
@@ -121,8 +121,8 @@ class Skeleton {
       }, sessionStoragies)
     }
 
-    if (response && !response.ok()) {
-      throw new Error(`${response.status} on ${url}`)
+    if (response && !response.ok() && response.status() != 304) {
+      throw new Error(`${response.status()} on ${url}`)
     }
 
 
