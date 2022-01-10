@@ -125,7 +125,7 @@ Re-package the application with webpack. When the page is restarted, you can see
 | pathname  | String          | Yes       | None         | Where the shell.html file shoud be output.                   |
 | staticDir | String          | Yes       | None         | Path to output static route page                             |
 | routes    | Array           | Yes       | None         | Route in `routes ` will generate static route with skeleton screen|
-| routeMode | String          | No        | `hash`       | 路由模式。 hash | history
+| routeMode | String          | No        | `hash`       | 路由模式。 hash \\| history
 | Port      | String          | No        | 8989         | The port of Page Skeleton server                             |
 | debug     | Boolean         | No        | `true`       | Whether debug mode is enabled or not, when debug is true, the output of the headless Chromium console will be output on the terminal. |
 | logLevel  | String          | No        | `info`       | Which type of messages you want to print in terminal, the optional values are `info`, `warn` and default value is `info`. |
