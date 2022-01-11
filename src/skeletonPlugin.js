@@ -37,7 +37,7 @@ SkeletonPlugin.prototype.insertScriptToClient = function (htmlPluginData) { // e
   }
 }
 
-SkeletonPlugin.prototype.initOriginalHtmlInfo = function() {
+SkeletonPlugin.prototype.initOriginalHtmlInfo = function(htmlPluginData) {
   const tmp = this.originalHtmlInfo.filter(item => item.outputName == htmlPluginData.outputName)
   if (tmp.length == 0) {
     this.originalHtmlInfo.push({
