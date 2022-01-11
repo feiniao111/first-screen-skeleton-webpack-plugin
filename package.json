@@ -1,6 +1,6 @@
 {
   "name": "first-screen-skeleton-webpack-plugin",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "首屏骨架屏生成注入webpack插件，支持多页面hash路由和单页面history路由，插件原型参考饿了么page-skeleton-webpack-plugin（https://github.com/ElemeFE/page-skeleton-webpack-plugin），骨架屏算法采用京东dps（https://github.com/famanoder/dps）",
   "main": "index.js",
   "scripts": {

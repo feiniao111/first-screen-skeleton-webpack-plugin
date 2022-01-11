@@ -49,6 +49,10 @@ SkeletonPlugin.prototype.outputSkeletonScreen = async function () { // eslint-di
 
 SkeletonPlugin.prototype.apply = function (compiler) { // eslint-disable-line func-names
   if (compiler.hooks) {
+    compiler.hooks.entryOption.tap(PLUGIN_NAME, () => {
+      this.createServer()
+    })
+    
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation) => {
       const htmlWebpackPluginBeforeHtmlProcessing = compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing || htmlWebpackPlugin.getHooks(compilation).afterTemplateExecution
 
