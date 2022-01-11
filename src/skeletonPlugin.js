@@ -37,6 +37,18 @@ SkeletonPlugin.prototype.insertScriptToClient = function (htmlPluginData) { // e
   }
 }
 
+SkeletonPlugin.prototype.initOriginalHtmlInfo = function() {
+  const tmp = this.originalHtmlInfo.filter(item => item.outputName == htmlPluginData.outputName)
+  if (tmp.length == 0) {
+    this.originalHtmlInfo.push({
+      html: htmlPluginData.html,
+      outputName: htmlPluginData.outputName
+    })
+  } else {
+    tmp[0].html = htmlPluginData.html
+  }
+}
+
 SkeletonPlugin.prototype.outputSkeletonScreen = async function () { // eslint-disable-line func-names
   for (let i = 0; i < this.originalHtmlInfo.length; i++) {
     try {
@@ -52,7 +64,7 @@ SkeletonPlugin.prototype.apply = function (compiler) { // eslint-disable-line fu
     compiler.hooks.entryOption.tap(PLUGIN_NAME, () => {
       this.createServer()
     })
-    
+
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation) => {
       const htmlWebpackPluginBeforeHtmlProcessing = compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing || htmlWebpackPlugin.getHooks(compilation).afterTemplateExecution
 
@@ -64,10 +76,7 @@ SkeletonPlugin.prototype.apply = function (compiler) { // eslint-disable-line fu
       const htmlWebpackPluginAfterHtmlProcessing = compilation.hooks.htmlWebpackPluginAfterHtmlProcessing || htmlWebpackPlugin.getHooks(compilation).beforeEmit
 
       htmlWebpackPluginAfterHtmlProcessing.tapAsync(PLUGIN_NAME, (htmlPluginData, callback) => {
-        this.originalHtmlInfo.push({
-          html: htmlPluginData.html,
-          outputName: htmlPluginData.outputName
-        })
+        this.initOriginalHtmlInfo(htmlPluginData)
         callback(null, htmlPluginData)
       })
     })
@@ -94,15 +103,8 @@ SkeletonPlugin.prototype.apply = function (compiler) { // eslint-disable-line fu
         callback(null, htmlPluginData)
       })
       compilation.plugin('html-webpack-plugin-after-html-processing', (htmlPluginData, callback) => {
-        const tmp = this.originalHtmlInfo.filter(item => item.outputName == htmlPluginData.outputName)
-        if (tmp.length == 0) {
-          this.originalHtmlInfo.push({
-            html: htmlPluginData.html,
-            outputName: htmlPluginData.outputName
-          })
-        } else {
-          tmp[0].html = htmlPluginData.html
-        }
+        this.initOriginalHtmlInfo(htmlPluginData)
+        
         callback(null, htmlPluginData)
       })
     })
