@@ -179,7 +179,8 @@ const pluginDefaultConfig = {
   quiet: false,
   noInfo: false,
   logTime: true,
-    htmlOption: { // 控制骨架屏参数
+  routeMode: 'hash'
+  htmlOption: { // 控制骨架屏参数
     background: '180% / 200% 100% linear-gradient(100deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, .5) 50%, rgba(255, 255, 255, 0) 60%) #ededed',
     render: false, // 是否立即渲染到页面上
     animation: 'loading 2s linear infinite', // 动画
